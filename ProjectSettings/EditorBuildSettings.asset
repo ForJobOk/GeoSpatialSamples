@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/_Kento/Scenes/ObjectOnAnchor.unity
+    guid: eec7a7edf9c147b48943394cfb23d999
+  - enabled: 1
+    path: Assets/_Kento/Scenes/OriginAdjust.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  m_configObjects:
+    UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: f14e3a66c5428244a9b2b0d33c14823b,
+      type: 2}
+    UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: faf24c654e970a54a9d8cd011f9f8b46,
+      type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: e5c1557fdbc059e44b2995a1574c33e6,
+      type: 2}
