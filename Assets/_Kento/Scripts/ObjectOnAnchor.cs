@@ -21,8 +21,7 @@ public class ObjectOnAnchor : MonoBehaviour
 
     private const double VERTICAL_THRESHOLD = 25;
     private const double HOLIZONTAL_THRESHOLD = 25;
-
-    private string currentInfo;
+    
     private ARGeospatialAnchor anchor;
 
     private void Update()
@@ -30,43 +29,43 @@ public class ObjectOnAnchor : MonoBehaviour
         //UnityEditorではAREarthManagerが動作しないのでスキップ
         if (Application.isEditor)
         {
-            currentInfo = "On Editor.";
+            SetInfo("On Editor.");
             return;
         }
         
         //ARFoundationのトラッキング準備が完了するまで何もしない
         if (ARSession.state != ARSessionState.SessionTracking)
         {
-            currentInfo = "ARSession.state is not ready.";
+            SetInfo("ARSession.state is not ready.");
             return;
         }
         
         if (!IsSupportedDevice())
         {
-            currentInfo = "This device is out of support GeoSpatial.";
+            SetInfo("This device is out of support GeoSpatial.");
             return;
         }
 
         if (!IsHighAccuracyDeviceEarthPosition())
         {
-            currentInfo = "Accuracy is low.";
+            SetInfo("Accuracy is low.");
             return;
         }
         else
         {
-            currentInfo = "Accuracy is High.";
+            SetInfo("Accuracy is High.");
         }
         
-        if (IsAddGeoSpatialAnchor(latitude, longitude, altitude))
+        if (IsExistGeoSpatialAnchor(latitude, longitude, altitude))
         {
-            currentInfo = "Adjust position and rotation.";
+            SetInfo("Adjust position and rotation.");
             Adjust();
         }
     }
 
-    private void LateUpdate()
+    private void SetInfo(string info)
     {
-        statusText.text = currentInfo;
+        statusText.text = info;
     }
 
     /// <summary>
@@ -107,9 +106,10 @@ public class ObjectOnAnchor : MonoBehaviour
     }
 
     /// <summary>
-    /// アンカーを追加する
+    /// アンカーの存在を確認
+    /// なければ追加
     /// </summary>
-    private bool IsAddGeoSpatialAnchor(double lat, double lng, double alt)
+    private bool IsExistGeoSpatialAnchor(double lat, double lng, double alt)
     {
         //EarthTrackingStateの準備ができていない場合は処理しない
         if (arEarthManager.EarthTrackingState != TrackingState.Tracking)

@@ -1,4 +1,6 @@
-﻿using Google.XR.ARCoreExtensions;
+﻿using System;
+using System.Collections;
+using Google.XR.ARCoreExtensions;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.ARFoundation;
@@ -7,24 +9,25 @@ using UnityEngine.XR.ARSubsystems;
 /// <summary>
 /// アンカーの位置がUnity座標系の原点となるように振る舞う
 /// </summary>
-public class GeoSpatialAdjsutOrigin : MonoBehaviour
+public class GeoSpatialAdjustOrigin : MonoBehaviour
 {
     [SerializeField] private ARAnchorManager arAnchorManager;
     [SerializeField] private AREarthManager arEarthManager;
-
+    [SerializeField] private Transform origin;
     [SerializeField] private double latitude;
     [SerializeField] private double longitude;
     [SerializeField] private double altitude;
-    
+    [SerializeField, Range(1, 10)] private float scanTime = 3f;
     [SerializeField] private Text statusText;
-
-    private const double VERTICAL_THRESHOLD = 25;
-    private const double HOLIZONTAL_THRESHOLD = 25;
-
-    private string currentInfo;
-    private ARGeospatialAnchor anchor;
     
+    private const double VERTICAL_THRESHOLD = 15;
+    private const double HOLIZONTAL_THRESHOLD = 15;
+    
+    private ARGeospatialAnchor anchor;
     private GameObject contentOffsetGameObject;
+    private Coroutine runningCoroutine;
+
+    public bool IsAdjustCompleted { get; private set; }
 
     /// <summary>
     /// ARSessionOriginの配下にAR座標系の原点となるオブジェクトを生成する
@@ -55,46 +58,58 @@ public class GeoSpatialAdjsutOrigin : MonoBehaviour
 
     private void Update()
     {
+        //位置合わせ完了後は何もしない
+        if (IsAdjustCompleted) return;
+        
         //UnityEditorではAREarthManagerが動作しないのでスキップ
         if (Application.isEditor)
         {
-            currentInfo = "On Editor.";
+            SetInfo("On Editor.");
             return;
         }
         
         //ARFoundationのトラッキング準備が完了するまで何もしない
         if (ARSession.state != ARSessionState.SessionTracking)
         {
-            currentInfo = "ARSession.state is not ready.";
+            SetInfo("ARSession.state is not ready.");
             return;
         }
         
         if (!IsSupportedDevice())
         {
-            currentInfo = "This device is out of support GeoSpatial.";
+            SetInfo("This device is out of support GeoSpatial.");
             return;
         }
 
         if (!IsHighAccuracyDeviceEarthPosition())
         {
-            currentInfo = "Accuracy is low.";
+            SetInfo("Accuracy is low.");
             return;
         }
         else
         {
-            currentInfo = "Accuracy is High.";
+            SetInfo("Accuracy is High.");
         }
         
-        if (IsAddGeoSpatialAnchor(latitude, longitude, altitude))
+        if (IsExistGeoSpatialAnchor(latitude, longitude, altitude))
         {
-            currentInfo = "Adjust position and rotation.";
-            Adjust();
+            SetInfo("Adjust position and rotation.");
+            runningCoroutine ??= StartCoroutine(AdjustCoroutine(AdjustComplete));
         }
     }
 
-    private void LateUpdate()
+    /// <summary>
+    /// 位置合わせ完了時に行う処理
+    /// </summary>
+    private void AdjustComplete()
     {
-        statusText.text = currentInfo;
+        SetInfo("Adjust Complete.");
+        IsAdjustCompleted = true;
+    }
+
+    private void SetInfo(string info)
+    {
+        statusText.text = info;
     }
 
     /// <summary>
@@ -128,22 +143,42 @@ public class GeoSpatialAdjsutOrigin : MonoBehaviour
     
     /// <summary>
     /// アンカーが原点の位置に来るようにAR座標系を動かして補正する
+    /// 指定秒数間位置合わせ精度が安定したら位置補正完了とみなし、補正しない
     /// </summary>
-    private void Adjust()
+    private IEnumerator AdjustCoroutine(Action adjustCompleteAction)
     {
-        //回転補正
-        var rot = Quaternion.Inverse(anchor.transform.rotation) * contentOffsetTransform.rotation;
+        var startAdjustTime = Time.time;
 
-        //位置補正
-        var pos = contentOffsetTransform.position - anchor.transform.position;
+        //Accuracyが一定秒数間安定するまで位置補正処理を行う
+        while (scanTime > Time.time - startAdjustTime)
+        {
+            if (IsHighAccuracyDeviceEarthPosition() && ARSession.state == ARSessionState.SessionTracking)
+            {
+                //回転補正
+                var rot = Quaternion.Inverse(anchor.transform.rotation) * contentOffsetTransform.rotation;
 
-        contentOffsetTransform.SetPositionAndRotation(pos, rot);
+                //位置補正
+                var pos = contentOffsetTransform.position - anchor.transform.position;
+
+                contentOffsetTransform.SetPositionAndRotation(pos, rot);
+            }
+            else
+            {
+                //精度が落ちたらやり直し
+                startAdjustTime = Time.time;
+            }
+
+            yield return null;
+        }
+        
+        adjustCompleteAction.Invoke();
     }
 
     /// <summary>
-    /// アンカーを追加する
+    /// アンカーの存在を確認
+    /// なければ追加
     /// </summary>
-    private bool IsAddGeoSpatialAnchor(double lat, double lng, double alt)
+    private bool IsExistGeoSpatialAnchor(double lat, double lng, double alt)
     {
         //EarthTrackingStateの準備ができていない場合は処理しない
         if (arEarthManager.EarthTrackingState != TrackingState.Tracking)
@@ -160,5 +195,15 @@ public class GeoSpatialAdjsutOrigin : MonoBehaviour
         }
 
         return anchor != null;
+    }
+    
+    /// <summary>
+    /// ワールド座標を任意の点から見たローカル座標に変換
+    /// </summary>
+    /// <param name="world">ワールド座標</param>
+    /// <returns></returns>
+    public Vector3 WorldToOriginLocal(Vector3 world)
+    {
+        return origin.transform.InverseTransformDirection(world);
     }
 }
