@@ -29,7 +29,7 @@ public class Paint : MonoBehaviourPun
         {
             var touch = Input.GetTouch(0);
             var inputPosition = Input.GetTouch(0).position;
-            var paintPosZ = 0.5f;
+            var paintPosZ = 0.3f;
             var tmpTouchPos = new Vector3(inputPosition.x, inputPosition.y, paintPosZ);
             var touchWorldPos = geoSpatialAdjsutOrigin.WorldToOriginLocal(Camera.main.ScreenToWorldPoint(tmpTouchPos));
 
