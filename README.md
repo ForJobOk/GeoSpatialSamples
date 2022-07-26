@@ -1,7 +1,9 @@
 # GeoSpatialSamples
 
 ## How to Use
-Set up to use GeoSpatial, and import PUN2.
+Set up to use GeoSpatial, and import PUN2.  
+Move the below prefab after import PUN2.  
+`Assets/_Kento/Prefabs/Player.prefab` → `Assets/Photon/PhotonUnityNetworking/Resources`
 
 ## Version info
 
