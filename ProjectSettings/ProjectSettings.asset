@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: kento
-  productName: GeoSpatialMultiplaySample
+  productName: GeoSpatialSamples
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -129,6 +129,7 @@ PlayerSettings:
     Others: 1
   bundleVersion: 0.1
   preloadedAssets:
+  - {fileID: 0}
   - {fileID: 11400000, guid: 8e19b6867b3f6944bae555b279f08c21, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -147,7 +148,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.kento.GeoSpatialMultiplaySample
+    Android: com.kento.GeoSpatialSamples
     Standalone: com.kento.GeoSpatialMultiplaySample
   buildNumber:
     Standalone: 0
