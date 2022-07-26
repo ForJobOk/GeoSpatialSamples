@@ -7,7 +7,7 @@ using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
 /// <summary>
-/// アンカーの位置がUnity座標系の原点となるように振る舞う
+/// アンカーの位置が原点となるように振る舞う
 /// </summary>
 public class GeoSpatialAdjustOrigin : MonoBehaviour
 {
@@ -30,7 +30,7 @@ public class GeoSpatialAdjustOrigin : MonoBehaviour
     public bool IsAdjustCompleted { get; private set; }
 
     /// <summary>
-    /// ARSessionOriginの配下にAR座標系の原点となるオブジェクトを生成する
+    /// ARSessionOriginの配下にSession Spaceの原点となるオブジェクトを生成する
     /// </summary>
     private Transform contentOffsetTransform
     {
@@ -142,7 +142,7 @@ public class GeoSpatialAdjustOrigin : MonoBehaviour
     }
     
     /// <summary>
-    /// アンカーが原点の位置に来るようにAR座標系を動かして補正する
+    /// アンカーが原点の位置に来るようにSession Spaceを動かして補正する
     /// 指定秒数間位置合わせ精度が安定したら位置補正完了とみなし、補正しない
     /// </summary>
     private IEnumerator AdjustCoroutine(Action adjustCompleteAction)
